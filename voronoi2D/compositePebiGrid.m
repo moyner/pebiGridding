@@ -135,7 +135,7 @@ if ~isempty(wellPts)
     for i = 1:size(resPtsInit,1)
         res = [res; mlqt(resPtsInit(i,:), wellPts, resGridSize, varArg{:})];
     end
-    resPts = vec2mat([res{:,1}],2);
+    resPts = reshape([res{:, 1}], 2, [])';
     %resGridSize = 0.5*[res{:,2}]';
 else
     resPts = resPtsInit;
