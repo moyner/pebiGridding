@@ -89,6 +89,10 @@ opt = struct('wellLines',       {{}}, ...
 opt = merge_options(opt, varargin{:});
 circleFactor = opt.circleFactor;
 
+if numel(resGridSize) == 1
+    resGridSize = [resGridSize, resGridSize];
+end
+
 % Set grid sizes
 wellGridSize   = resGridSize*opt.wellGridFactor;
 faultGridSize  = resGridSize*opt.faultGridFactor;
@@ -96,12 +100,13 @@ mlqtMaxLevel   = opt.mlqtMaxLevel;
 mlqtLevelSteps = opt.mlqtLevelSteps;
 
 % Test input
-assert(resGridSize>0);
+assert(all(resGridSize>0));
+assert(numel(resGridSize)==2);
 assert(numel(pdims)==2);
 assert(all(pdims>0 ));
-assert(wellGridSize>0);
+assert(all(wellGridSize>0));
 assert(mlqtMaxLevel>=0);
-assert(faultGridSize>0);
+assert(all(faultGridSize>0));
 assert(0.5<circleFactor && circleFactor<1);
 
 % Load faults and Wells
@@ -119,8 +124,8 @@ F = createFaultGridPoints(faultLines, faultGridSize, 'circleFactor', circleFacto
                           'fCut',fCut,'fwCut', fwCut);
 
 % Create reservoir grid
-dx = pdims(1)/ceil(pdims(1)/resGridSize);
-dy = pdims(2)/ceil(pdims(2)/resGridSize);
+dx = pdims(1)/ceil(pdims(1)/resGridSize(1));
+dy = pdims(2)/ceil(pdims(2)/resGridSize(2));
 vx = 0:dx:pdims(1);
 vy = 0:dy:pdims(2);
 
@@ -133,7 +138,7 @@ if ~isempty(wellPts)
     res = {};
     varArg = {'level', 1, 'maxLev', mlqtMaxLevel, 'distTol', mlqtLevelSteps};
     for i = 1:size(resPtsInit,1)
-        res = [res; mlqt(resPtsInit(i,:), wellPts, resGridSize, varArg{:})];
+        res = [res; mlqt(resPtsInit(i,:), wellPts, min(resGridSize), varArg{:})];
     end
     resPts = reshape([res{:, 1}], 2, [])';
     %resGridSize = 0.5*[res{:,2}]';
